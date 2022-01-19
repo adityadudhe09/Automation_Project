@@ -71,3 +71,29 @@ aws s3 \
 cp /tmp/${name}-httpd-logs-${timestamp}.tar \
 s3://${s3_bucket}/${name}-httpd-logs-${timestamp}.tar
 echo
+
+#Check if the inventory.html file exist
+inventoryFile=/var/www/html/inventory.html
+fsize=$(ls -lh /tmp/$filename | grep httpd | awk '{print $5}' )
+logType="httpd-logs"
+if ! test -f "$inventoryFile"; then
+
+        echo "Inventory File is missing!!! Let's create Inventory file..."
+        touch ${inventoryFile}
+        
+         printf "Log Type               Time Stamp            Type          Size          \n" >> ${inventoryFile}
+         echo 
+         printf "$logType          $timestamp          tar            $fsize           \n" >> ${inventoryFile}
+fi
+	echo "Logs are updated in Inventory file..."
+	printf "$logType          $timestamp          tar            $fsize           \n" >> ${inventoryFile}
+
+
+#Creating a cron job file for everyday run
+
+cronjob=/etc/cron.d/automation
+
+if [ ! -f $cronjob ]; then
+	touch /etc/cron.d/automation
+	printf "* * * * * root /root/Automation_Project/auotmation.sh" >> ${cronjob}
+fi
